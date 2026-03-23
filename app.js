@@ -34,7 +34,7 @@ app.get("/profile", isLoggedIn, async (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-    res.render("register")
+    res.render("register", { error: null, formData: {}, fieldErrors: {} })
 })
 
 app.post("/register", async (req, res) => {
@@ -45,31 +45,92 @@ app.post("/register", async (req, res) => {
     const normalizedName = (name || "").trim();
     const normalizedPassword = (password || "").trim();
     const parsedAge = Number(age);
+    const formData = {
+        name: normalizedName,
+        username: normalizedUsername,
+        age: age || "",
+        email: normalizedEmail
+    };
 
     if (!normalizedName || !normalizedUsername || !normalizedEmail || !normalizedPassword || Number.isNaN(parsedAge)) {
-        return res.status(400).send("Name, username, age, email and password are required");
+        return res.status(400).render("register", {
+            error: "Name, username, age, email and password are required",
+            formData,
+            fieldErrors: {
+                name: !normalizedName,
+                username: !normalizedUsername,
+                age: Number.isNaN(parsedAge),
+                email: !normalizedEmail,
+                password: !normalizedPassword
+            }
+        });
     }
 
     if (!Number.isInteger(parsedAge) || parsedAge < 1 || parsedAge > 120) {
-        return res.status(400).send("Age must be a valid number between 1 and 120");
+        return res.status(400).render("register", {
+            error: "Age must be a valid number between 1 and 120",
+            formData,
+            fieldErrors: { age: true }
+        });
     }
 
     if (!isValidEmail(normalizedEmail)) {
-        return res.status(400).send("Please provide a valid email");
+        return res.status(400).render("register", {
+            error: "Please provide a valid email",
+            formData,
+            fieldErrors: { email: true }
+        });
     }
 
     if (normalizedPassword.length < 6) {
-        return res.status(400).send("Password must be at least 6 characters long");
+        return res.status(400).render("register", {
+            error: "Password must be at least 6 characters long",
+            formData,
+            fieldErrors: { password: true }
+        });
     }
 
-    let user = await userModel.findOne({email: normalizedEmail});
-    if (user) return res.status(409).send("User already registered");
+    let user = await userModel.findOne({
+        $or: [
+            { email: normalizedEmail },
+            { username: normalizedUsername }
+        ]
+    });
+    if (user) {
+        const duplicateFieldErrors = {
+            email: user.email === normalizedEmail,
+            username: user.username === normalizedUsername
+        };
+
+        if (!duplicateFieldErrors.email && !duplicateFieldErrors.username) {
+            duplicateFieldErrors.email = true;
+            duplicateFieldErrors.username = true;
+        }
+
+        return res.status(409).render("register", {
+            error: "Username or email already exists",
+            formData,
+            fieldErrors: duplicateFieldErrors
+        });
+    }
 
     bcrypt.genSalt(10, (err, salt) => {
-        if (err) return res.status(500).send("Error while generating password salt");
+        if (err) {
+            return res.status(500).render("register", {
+                error: "Something went wrong. Please try again.",
+                formData,
+                fieldErrors: {}
+            });
+        }
 
-        bcrypt.hash(password, salt, async (err, hash) => {
-            if (err) return res.status(500).send("Error while hashing password");
+        bcrypt.hash(normalizedPassword, salt, async (err, hash) => {
+            if (err) {
+                return res.status(500).render("register", {
+                    error: "Something went wrong. Please try again.",
+                    formData,
+                    fieldErrors: {}
+                });
+            }
 
             let user;
             try {
@@ -82,10 +143,28 @@ app.post("/register", async (req, res) => {
                 });
             } catch (error) {
                 if (error?.code === 11000) {
-                    return res.status(409).send("Username or email already exists");
+                    const duplicateFieldErrors = {
+                        email: Boolean(error?.keyPattern?.email),
+                        username: Boolean(error?.keyPattern?.username)
+                    };
+
+                    if (!duplicateFieldErrors.email && !duplicateFieldErrors.username) {
+                        duplicateFieldErrors.email = true;
+                        duplicateFieldErrors.username = true;
+                    }
+
+                    return res.status(409).render("register", {
+                        error: "Username or email already exists",
+                        formData,
+                        fieldErrors: duplicateFieldErrors
+                    });
                 }
 
-                return res.status(500).send("Error while creating user");
+                return res.status(500).render("register", {
+                    error: "Something went wrong. Please try again.",
+                    formData,
+                    fieldErrors: {}
+                });
             }
 
             let token = jwt.sign({email: normalizedEmail, userid: user._id}, process.env.JWT_SECRET, {expiresIn: "3d"});
@@ -107,7 +186,7 @@ app.post("/register", async (req, res) => {
 })
 
 app.get("/login", (req, res) => {
-    res.render("login", { error: null, identifier: "" })
+    res.render("login", { error: null, identifier: "", fieldErrors: {} })
 })
 
 app.post("/login", async (req, res) => {
@@ -119,14 +198,19 @@ app.post("/login", async (req, res) => {
     if (!normalizedIdentifier || !normalizedPassword) {
         return res.status(400).render("login", {
             error: "Email/username and password are required",
-            identifier: normalizedIdentifier
+            identifier: normalizedIdentifier,
+            fieldErrors: {
+                identifier: !normalizedIdentifier,
+                password: !normalizedPassword
+            }
         });
     }
 
     if (normalizedIdentifier.includes("@") && !isValidEmail(normalizedIdentifier)) {
         return res.status(400).render("login", {
             error: "Please provide a valid email",
-            identifier: normalizedIdentifier
+            identifier: normalizedIdentifier,
+            fieldErrors: { identifier: true }
         });
     }
 
@@ -139,7 +223,8 @@ app.post("/login", async (req, res) => {
     if(!user) {
         return res.status(401).render("login", {
             error: "Invalid email/username or password",
-            identifier: normalizedIdentifier
+            identifier: normalizedIdentifier,
+            fieldErrors: { identifier: true, password: true }
         });
     }
 
@@ -147,7 +232,8 @@ app.post("/login", async (req, res) => {
     if(!match) {
         return res.status(401).render("login", {
             error: "Invalid email/username or password",
-            identifier: normalizedIdentifier
+            identifier: normalizedIdentifier,
+            fieldErrors: { identifier: true, password: true }
         });
     }
 
@@ -180,12 +266,44 @@ function isLoggedIn(req, res, next){
     }
 }
 
-app.post("/post/create", isLoggedIn, async (req, res) => {
+app.post("/post", isLoggedIn, async (req, res) => {
+    const content = (req.body.content || "").trim();
+
+    if (!content) {
+        return res.redirect("/profile");
+    }
+
+    // One-way reference: the post keeps ownership via user id; this avoids
+    // duplicating post ids inside user documents.
     let post = await postModel.create({
-        content: req.body.content,
+        content,
         user: req.user.userid
     });
     res.redirect("/profile");
+});
+
+app.post("/post/edit/:id", isLoggedIn, async (req, res) => {
+    const content = (req.body.content || "").trim();
+
+    if (!content) {
+        return res.status(400).json({ success: false, message: "Content is required" });
+    }
+
+    try {
+        const post = await postModel.findOneAndUpdate(
+            { _id: req.params.id, user: req.user.userid },
+            { content },
+            { new: true }
+        );
+
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to update post" });
+    }
 });
 
 

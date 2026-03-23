@@ -13,29 +13,33 @@
             <h3 class="text-3xl font-bold mb-2">Create Account</h3>
             <p class="text-zinc-400 text-sm mb-8">Join us today, it's free!</p>
 
+            <% if (error) { %>
+                <p class="text-red-400 text-sm mb-4"><%= error %></p>
+            <% } %>
+
             <form action="/register" method="post" class="flex flex-col gap-4">
                 <div class="flex flex-col gap-1">
                     <label class="text-sm text-zinc-400">Name</label>
-                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="text" placeholder="Enter your name" name="name">
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border outline-none transition <%= fieldErrors && fieldErrors.name ? 'border-red-500 focus:border-red-500' : 'border-zinc-600 focus:border-blue-500' %>" type="text" placeholder="Enter your name" name="name" value="<%= formData?.name || '' %>">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-sm text-zinc-400">Username</label>
-                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="text" placeholder="Enter username" name="username">
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border outline-none transition <%= fieldErrors && fieldErrors.username ? 'border-red-500 focus:border-red-500' : 'border-zinc-600 focus:border-blue-500' %>" type="text" placeholder="Enter username" name="username" value="<%= formData?.username || '' %>">
                 </div>
                 
                 <div class="flex flex-col gap-1">
                     <label class="text-sm text-zinc-400">Age</label>
-                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="text" placeholder="Enter age" name="age" inputmode="numeric" pattern="[0-9]*">
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border outline-none transition <%= fieldErrors && fieldErrors.age ? 'border-red-500 focus:border-red-500' : 'border-zinc-600 focus:border-blue-500' %>" type="text" placeholder="Enter age" name="age" inputmode="numeric" pattern="[0-9]*" value="<%= formData?.age || '' %>">
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <label class="text-sm text-zinc-400">Email</label>
-                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="email" placeholder="Enter email" name="email">
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border outline-none transition <%= fieldErrors && fieldErrors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-600 focus:border-blue-500' %>" type="email" placeholder="Enter email" name="email" value="<%= formData?.email || '' %>">
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <label class="text-sm text-zinc-400">Password</label>
-                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="password" placeholder="Enter password" name="password">
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border outline-none transition <%= fieldErrors && fieldErrors.password ? 'border-red-500 focus:border-red-500' : 'border-zinc-600 focus:border-blue-500' %>" type="password" placeholder="Enter password" name="password">
                 </div>
 
                 <input class="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 cursor-pointer transition font-semibold mt-2" type="submit" value="Create Account">

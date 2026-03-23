@@ -21,10 +21,9 @@ const userSchema = mongoose.Schema({
         trim: true,
         lowercase: true
     },
-    password: String,
-    posts: [
-        {type: mongoose.Schema.Types.ObjectId, ref: "post"}
-    ]
+    password: String
+    // One-way reference model: posts store the user id, so we do not duplicate
+    // post ids on the user document.
 });
 
 module.exports = mongoose.model('user', userSchema);
