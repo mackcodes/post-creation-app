@@ -1,0 +1,29 @@
+{
+  "name": "post-creation-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "postcss public/stylesheets/input.css -o public/stylesheets/global.css --watch"
+  },
+  "keywords": [],
+  "author": "Mayank Kumar",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.1",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "postcss-cli": "^11.0.1"
+  }
+}

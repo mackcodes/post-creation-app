@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/stylesheets/global.css">
+</head>
+<body>
+    <div class="w-full h-screen bg-zinc-900 text-white flex items-center justify-center">
+        <div class="bg-zinc-800 p-10 rounded-2xl shadow-2xl w-96">
+        
+            <h3 class="text-3xl font-bold mb-2">Create Account</h3>
+            <p class="text-zinc-400 text-sm mb-8">Join us today, it's free!</p>
+
+            <form action="/register" method="post" class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm text-zinc-400">Name</label>
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="text" placeholder="Enter your name" name="name">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm text-zinc-400">Username</label>
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="text" placeholder="Enter username" name="username">
+                </div>
+                
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm text-zinc-400">Age</label>
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="text" placeholder="Enter age" name="age" inputmode="numeric" pattern="[0-9]*">
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm text-zinc-400">Email</label>
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="email" placeholder="Enter email" name="email">
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm text-zinc-400">Password</label>
+                    <input class="px-3 py-2 rounded-lg bg-zinc-700 border border-zinc-600 outline-none focus:border-blue-500 transition" type="password" placeholder="Enter password" name="password">
+                </div>
+
+                <input class="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 cursor-pointer transition font-semibold mt-2" type="submit" value="Create Account">
+            </form>
+
+            <p class="text-zinc-400 text-sm text-center mt-6">Already have an account? 
+                <a class="text-blue-500 hover:underline" href="/login">Login</a>
+            </p>
+
+        </div>
+    </div>
+</body>
+</html>
