@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://127.0.0.1:27017/postApp");
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    throw new Error("MONGODB_URI is not set in environment variables");
+}
+
+mongoose.connect(MONGODB_URI);
 
 const userSchema = mongoose.Schema({
     username: {

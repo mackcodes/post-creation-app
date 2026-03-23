@@ -10,6 +10,17 @@ const cookieParser = require('cookie-parser');
 const userModel = require('./models/user')
 const postModel = require('./models/post');
 
+const PORT = Number(process.env.PORT || 3000);
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "3d";
+const COOKIE_NAME = process.env.COOKIE_NAME || "token";
+const COOKIE_MAX_AGE_MS = Number(process.env.COOKIE_MAX_AGE_MS || 1000 * 60 * 60 * 24 * 3);
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is not set in environment variables");
+}
+
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -167,18 +178,12 @@ app.post("/register", async (req, res) => {
                 });
             }
 
-            let token = jwt.sign({email: normalizedEmail, userid: user._id}, process.env.JWT_SECRET, {expiresIn: "3d"});
-            res.cookie("token", token, {
+            let token = jwt.sign({email: normalizedEmail, userid: user._id}, JWT_SECRET, {expiresIn: JWT_EXPIRES_IN});
+            res.cookie(COOKIE_NAME, token, {
                 httpOnly: true,
-                // secure: true,   --> it will not work in local host(development use)
+                secure: IS_PRODUCTION,
                 sameSite: "strict",
-                /* Because `maxAge` is in milliseconds**, so we have to convert: 
-                    1000        = 1 second      (milliseconds in 1 second)
-                    1000 * 60   = 1 minute      (60 seconds in 1 minute)
-                    1000 * 60 * 60    = 1 hour  (60 minutes in 1 hour)
-                    1000 * 60 * 60 * 24 = 1 day (24 hours in 1 day)
-                */
-                maxAge: 1000 * 60 * 60 * 24 * 3 // for three days
+                maxAge: COOKIE_MAX_AGE_MS
             })
             res.redirect("/profile");
         })
@@ -237,11 +242,12 @@ app.post("/login", async (req, res) => {
         });
     }
 
-    let token = jwt.sign({email: user.email, userid: user._id}, process.env.JWT_SECRET, {expiresIn: "3d"});
-    res.cookie("token", token, {
+    let token = jwt.sign({email: user.email, userid: user._id}, JWT_SECRET, {expiresIn: JWT_EXPIRES_IN});
+    res.cookie(COOKIE_NAME, token, {
         httpOnly: true,
         sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24 * 3
+        secure: IS_PRODUCTION,
+        maxAge: COOKIE_MAX_AGE_MS
     });
 
 
@@ -249,19 +255,19 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-    res.clearCookie("token");  //res.cookie("token", "") --> wrong approach
+    res.clearCookie(COOKIE_NAME);  //res.cookie("token", "") --> wrong approach
     res.redirect("login");
 })
 
 function isLoggedIn(req, res, next){
-    if(!req.cookies.token) return res.redirect("/login");
+    if(!req.cookies[COOKIE_NAME]) return res.redirect("/login");
 
     try{
-        let data = jwt.verify(req.cookies.token, process.env.JWT_SECRET); // verifies token is valid and not expired
+        let data = jwt.verify(req.cookies[COOKIE_NAME], JWT_SECRET); // verifies token is valid and not expired
         req.user = data;  //attach user data to request for next route
         next();
     } catch(err){  // --> if token expired or tampered => clear cookies and redirect
-        res.clearCookie("token");
+        res.clearCookie(COOKIE_NAME);
         res.redirect("/login");
     }
 }
@@ -307,4 +313,4 @@ app.post("/post/edit/:id", isLoggedIn, async (req, res) => {
 });
 
 
-app.listen(3000);
+app.listen(PORT);

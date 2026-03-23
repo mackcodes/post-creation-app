@@ -31,12 +31,41 @@ A Node.js + Express + MongoDB app with EJS views for user authentication and pos
 - `views/`: EJS templates (`login`, `register`, `profile`)
 - `public/stylesheets/`: generated and source CSS
 
+## Clone The Repository
+
+```bash
+git clone git@github.com:mackcodes/post-creation-app.git
+cd post-creation-app
+```
+
+If you prefer HTTPS:
+
+```bash
+git clone https://github.com/mackcodes/post-creation-app.git
+cd post-creation-app
+```
+
 ## Environment Variables
 
-Create a `.env` file in the project root:
+1. Copy the example file:
+
+```bash
+cp .env.example .env
+```
+
+2. Update values in `.env` as needed:
 
 ```env
-JWT_SECRET=your-strong-secret
+NODE_ENV=development
+PORT=3000
+
+MONGODB_URI=mongodb://127.0.0.1:27017/postApp
+
+JWT_SECRET=replace_with_a_long_random_secret
+JWT_EXPIRES_IN=3d
+
+COOKIE_NAME=token
+COOKIE_MAX_AGE_MS=259200000
 ```
 
 ## Local Setup
@@ -47,23 +76,45 @@ JWT_SECRET=your-strong-secret
 npm install
 ```
 
-2. Ensure MongoDB is running locally on:
+2. Create your local environment file:
+
+```bash
+cp .env.example .env
+```
+
+3. Ensure MongoDB is running locally on:
 
 - `mongodb://127.0.0.1:27017/postApp`
 
-3. Start CSS watcher (optional, for style changes):
+4. Start CSS watcher (optional, for style changes):
 
 ```bash
 npm run dev
 ```
 
-4. Start the server:
+5. Start the server:
 
 ```bash
 node app.js
 ```
 
 App runs on: `http://localhost:3000`
+
+## Typical Workflow
+
+Open two terminals:
+
+- Terminal 1 (styles):
+
+```bash
+npm run dev
+```
+
+- Terminal 2 (server):
+
+```bash
+node app.js
+```
 
 ## Auth Flow
 
